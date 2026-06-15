@@ -1,0 +1,11 @@
+ANNOTATIONS:
+
+1. @SpringBootApplication //Launches the application with auto-configuration.
+2. @Entity //Maps a Java class to a database table.
+3. @Data //Lombok generates getters/setters, toString, equals, hashCode
+4. @Id //Establishes the primary key of the database table.
+5. @GeneratedValue(strategy=GenerationType.IDENTITY) //Automates primary key creation. Tells the database to automatically increment the ID number whenever a new row is inserted.
+6. @Service //to say that the class is a service class, Marks a class as a business logic component.
+7. @Autowired //automatically inject dependencies, dependent objects into a class. Eliminates the need to use the new keyword to instantiate objects manually.
+8. @RestController //Enables a class to handle RESTful web API requests.
+9. @RequestMapping("/students") //Sets the base URL routing path for web requests.

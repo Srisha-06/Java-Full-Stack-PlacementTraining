@@ -1,0 +1,27 @@
+<html>
+<body>
+	<button onclick="handleclick()">ClickMe</button>
+	<h1 style="color:darkgreen;" id="res"></h1>
+<script>
+	function handleclick(){
+		let x=-5;
+		if(x>=10 && x<=50){
+			console.log("Its between 10 and 50");
+			document.getElementById("res").textContent="Its between 10 and 50";
+		}
+		else if(x>50 && x<=100){
+			console.log("Its between 50 and 100");
+			document.getElementById("res").textContent="Its between 50 and 100";
+		}
+		else if(x>100){
+			console.log("Its above 100");
+			document.getElementById("res").textContent="Its above 100";
+		}
+		else{
+			console.log("Its not in the list");
+			document.getElementById("res").textContent="Its not in the list";
+		}
+	}
+</script>
+</body>
+</html>

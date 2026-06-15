@@ -1,0 +1,31 @@
+<html>
+<body>
+	<h1>Train-task</h1>
+	<input type="number" id="seat" placeholder="Enter the seat number">
+	<input type=:number" id="clss" placeholder="Enter the class number">
+	<button onclick="handleclick()">Seatlocation</button>
+	<h2 id="res"></h2>
+</body>
+<script>
+	function handleclick(){
+		let cls=document.getElementById("clss").value;
+		if(cls==3){
+			let n=document.getElementById("seat").value;
+			if(n>80 || n<1) document.getElementById("res").textContent="Invalid Seat number";
+			else if((n%8)==1 || (n%8)==4) document.getElementById("res").textContent="Lower";
+			else if((n%8)==2 || (n%8)==5) document.getElementById("res").textContent="Middle";
+			else if((n%8)==3 || (n%8)==6) document.getElementById("res").textContent="Upper";
+			else if((n%8)==7) document.getElementById("res").textContent="SideLower";
+			else if((n%8)==0) document.getElementById("res").textContent="SideUpper";
+		}
+		else if(cls==2){
+			let n=document.getElementById("seat").value;
+			if(n>60 || n<1) document.getElementById("res").textContent="Invalid Seat number";
+			else if((n%6)==1 || (n%6)==3) document.getElementById("res").textContent="Lower";
+			else if((n%6)==2 || (n%6)==4) document.getElementById("res").textContent="Upper";
+			else if((n%6)==5) document.getElementById("res").textContent="SideLower";
+			else if((n%6)==0) document.getElementById("res").textContent="SideUpper";
+		}
+	}
+</script>
+</html>
