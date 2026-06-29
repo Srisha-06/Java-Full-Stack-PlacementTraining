@@ -1,0 +1,592 @@
+Categories of Creational Pattern:
+1. FACTORY METHOD:
+
+without factory method:(BAD CODE)
+if(type.equals("SUV")) {
+    car = new SUV();
+} else if(type.equals("Sedan")) {
+    car = new Sedan();
+}
+-------------------------------------------------------------------
+Example: CarFactory Class(CORRECT CODE)
+// Car interface
+interface Car {
+    void drive();
+}
+// Concrete classes
+class SUV implements Car {
+    public void drive() { System.out.println("Driving an SUV"); }
+}
+class Sedan implements Car {
+    public void drive() { System.out.println("Driving a Sedan"); }
+}
+// Factory class
+class CarFactory {
+    public static Car createCar(String type) {
+        if(type.equalsIgnoreCase("SUV")) {
+            return new SUV();
+        } else if(type.equalsIgnoreCase("Sedan")) {
+            return new Sedan();
+        }
+        return null; // or throw exception
+    }
+}
+//Using the Factory
+public class Showroom {
+    public static void main(String[] args) {
+        Car car1 = CarFactory.createCar("SUV");
+        car1.drive();   // Output: Driving an SUV
+        Car car2 = CarFactory.createCar("Sedan");
+        car2.drive();   // Output: Driving a Sedan
+    }
+}
+=============================================================================================================================
+// Problem Statement:
+// You are building a Payment System.
+// Right now, the code directly creates objects like
+// new CreditCardPayment() or new PayPalPayment() using if/else.
+// This makes the code messy and hard to extend when new payment methods are added.
+
+// Your Task:
+// 1. Write the bad code where payments are created using if/else.
+// 2. Refactor it using a PaymentFactory class that decides which payment object to create.
+// 3. Add a new payment type (e.g., UPIPayment) and show how easy it is to extend with the factory.
+
+// Deliverables:
+// - Create a Payment interface.
+// - Implement CreditCardPayment, PayPalPayment, and UPIPayment classes.
+// - Implement a PaymentFactory class that returns the correct object.
+// - Show usage in a Main class.
+=============================================================================================================================
+interface Payment{
+	void payment();
+}
+class CreditCardPayment implements Payment{
+	public void payment(){
+		System.out.println("This is CreditCardPayment");
+	}
+}
+class PayPalPayment implements Payment{
+	public void payment(){
+		System.out.println("This is PayPalPayment");
+	}
+}
+class UPIPayment implements Payment{
+	public void payment(){
+		System.out.println("This is UPIPayment");
+	}
+}
+class PaymentFactory{
+	public static Payment makePayment(String type){
+		if(type.equalsIgnoreCase("CreditCard")){
+			return new CreditCardPayment();
+		}else if(type.equalsIgnoreCase("PayPal")){
+			return new PayPalPayment();
+		}else if(type.equalsIgnoreCase("UPI")){
+			return new UPIPayment();
+		}
+		return null;
+	}
+}
+class Main{
+	public static void main(String[] args){
+		Payment p1=PaymentFactory.makePayment("CreditCard");
+		p1.payment();
+		Payment p2=PaymentFactory.makePayment("PayPal");
+		p2.payment();
+		Payment p3=PaymentFactory.makePayment("UPI");
+		p3.payment();
+	}
+}
+=============================================================================================================================
+2. ABSTRACT FACTORY:
+
+BAD CODE:
+// Directly creating objects → tightly coupled
+class VictorianChair {}
+class VictorianTable {}
+class ModernChair {}
+class ModernTable {}
+public class Main {
+    public static void main(String[] args) {
+        VictorianChair chair = new VictorianChair();
+        VictorianTable table = new VictorianTable();
+        // If we switch to Modern, we must change everywhere
+        ModernChair chair2 = new ModernChair();
+        ModernTable table2 = new ModernTable();
+    }
+}
+Problem: Code is tightly coupled to specific classes.
+Hard to switch product families
+----------------------------------------------------------------
+CORRECT CODE:
+// Abstract product interfaces
+interface Chair { void sit(); }
+interface Table { void use(); }
+// Concrete products
+class VictorianChair implements Chair {
+    public void sit() { System.out.println("Sitting on Victorian Chair"); }
+}
+class VictorianTable implements Table {
+    public void use() { System.out.println("Using Victorian Table"); }
+}
+class ModernChair implements Chair {
+    public void sit() { System.out.println("Sitting on Modern Chair"); }
+}
+class ModernTable implements Table {
+    public void use() { System.out.println("Using Modern Table"); }
+}
+// Abstract Factory
+interface FurnitureFactory {
+    Chair createChair();
+    Table createTable();
+}
+// Concrete Factories
+class VictorianFactory implements FurnitureFactory {
+    public Chair createChair() { return new VictorianChair(); }
+    public Table createTable() { return new VictorianTable(); }
+}
+class ModernFactory implements FurnitureFactory {
+    public Chair createChair() { return new ModernChair(); }
+    public Table createTable() { return new ModernTable(); }
+}
+// Client
+public class Main {
+    public static void main(String[] args) {
+        FurnitureFactory factory = new VictorianFactory();
+        Chair chair = factory.createChair();
+        Table table = factory.createTable();
+        chair.sit();   // Sitting on Victorian Chair
+        table.use();   // Using Victorian Table
+        factory = new ModernFactory();
+        Chair chair2 = factory.createChair();
+        Table table2 = factory.createTable();
+        chair2.sit();  // Sitting on Modern Chair
+        table2.use();  // Using Modern Table
+    }
+}
+Benefit: Easily switch between product families (Victorian ↔ Modern).
+Client code stays clean and flexible.
+=============================================================================================================================
+TASK: Create a GUI Toolkit using Abstract Factory
+// Requirements:
+// 1. Define Button and Checkbox interfaces.
+// 2. Implement WindowsButton + WindowsCheckbox, MacButton + MacCheckbox.
+// 3. Create WindowsFactory and MacFactory to produce families of GUI components.
+// 4. Demonstrate in Main how switching factories changes the entire UI style.
+=============================================================================================================================
+interface button{ void useButton(); }
+interface checkbox{ void useCheck(); }
+class windowsButton implements button{
+	public void useButton(){
+		System.out.println("This is WindowsButton");
+	}
+}
+class macButton implements button{
+	public void useButton(){
+		System.out.println("This is MacButton");
+	}
+}
+class windowsCheckbox implements checkbox{
+	public void useCheck(){
+		System.out.println("This is WindowsCheckbox");
+	}
+}
+class macCheckbox implements checkbox{
+	public void useCheck(){
+		System.out.println("This is MacCheckbox");
+	}
+}
+interface factory{
+	button createbutton();
+	checkbox createcheckbox();
+}
+class windowsFeatures implements factory{
+	public button createbutton(){ return new windowsButton(); }
+	public checkbox createcheckbox(){ return new windowsCheckbox(); }
+}
+class macFeatures implements factory{
+	public button createbutton(){ return new macButton(); }
+	public checkbox createcheckbox(){ return new macCheckbox(); }
+}
+class Main{
+	public static void main(String[] args){
+		factory fac=new windowsFeatures();
+		button b1=fac.createbutton();
+		checkbox c1=fac.createcheckbox();
+		b1.useButton();
+		c1.useCheck();
+		fac=new macFeatures();
+		button b2=fac.createbutton();
+		checkbox c2=fac.createcheckbox();
+		b2.useButton();
+		c2.useCheck();
+	}
+}
+=============================================================================================================================
+3. SINGLETON:
+
+// BAD CODE: Each player creates their own scoreboard
+class Scoreboard {
+    private int score;
+    public void addPoints(int points) {
+        score += points;
+        System.out.println("Score updated: " + score);
+    }
+    public int getScore() {
+        return score;
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        // Two players, two different scoreboards
+        Scoreboard player1Board = new Scoreboard();
+        Scoreboard player2Board = new Scoreboard();
+        player1Board.addPoints(10); // Score updated: 10
+        player2Board.addPoints(20); // Score updated: 20
+        // Confusing: two separate scores!
+        System.out.println("Player1 Scoreboard: " + player1Board.getScore()); // 10
+        System.out.println("Player2 Scoreboard: " + player2Board.getScore()); // 20
+    }
+}
+---------------------------------------------------------------------------------------
+CORRECT CODE:
+
+class Scoreboard {
+    private static Scoreboard instance; // single shared object
+    private int score;
+    // private constructor prevents direct object creation
+    private Scoreboard() {}
+    // method to access the single instance
+    public static Scoreboard getInstance() {
+        if (instance == null) {
+            instance = new Scoreboard();
+        }
+        return instance;
+    }
+    public void addPoints(int points) {
+        score += points;
+        System.out.println("Score updated: " + score);
+    }
+    public int getScore() {
+        return score;
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        // both variables refer to SAME object
+        Scoreboard player1Board = Scoreboard.getInstance();
+        Scoreboard player2Board = Scoreboard.getInstance();
+        player1Board.addPoints(10); // Score: 10
+        player2Board.addPoints(20); // Score: 30 (same instance!)
+        System.out.println("Player1 Scoreboard: " + player1Board.getScore()); // 30
+        System.out.println("Player2 Scoreboard: " + player2Board.getScore()); // 30
+    }
+}
+=============================================================================================================================
+// Task: Create a DatabaseConnection class as a Singleton
+// Requirements:
+// 1. Only one connection object should exist.
+// 2. Provide a getInstance() method to access it.
+// 3. Demonstrate in Main that multiple calls return the same object.
+=============================================================================================================================
+class DataBaseConnection{
+   private String message;
+   private static DataBaseConnection instance;
+   private DataBaseConnection() {
+       message="";
+       System.out.println("DataBase Connection created");
+   }
+   public static DataBaseConnection getInstance() {
+       if(instance==null) {
+           instance=new DataBaseConnection();
+       }
+       return instance;
+   }
+   public void setMess(String msg) {
+
+       message=msg;
+
+       System.out.println("Current Status: "+msg);
+   }
+   public String getMessage() {
+       return message;
+   }
+}
+public class DataBaseSingleton {
+   public static void main(String args[]) {
+       DataBaseConnection db1=DataBaseConnection.getInstance();
+       DataBaseConnection db2=DataBaseConnection.getInstance();
+       db1.setMess("Student DataBase Created!");
+       db2.setMess("Records added to student DB!");
+       System.out.println("Current message : "+db1.getMessage());
+       System.out.println("Current message : "+db2.getMessage());
+   }
+}
+=============================================================================================================================
+4. BUILDER:
+
+BAD CODE:
+// Pizza with too many constructor parameters
+class Pizza {
+    private String dough;
+    private String sauce;
+    private String topping;
+
+    public Pizza(String dough, String sauce, String topping) {
+        this.dough = dough;
+        this.sauce = sauce;
+        this.topping = topping;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // Hard to read, error‑prone
+        Pizza pizza = new Pizza("Thin Crust", "Tomato", "Cheese");
+    }
+}
+--------------------------------------------------------------------------
+CORRECT CODE:
+// Pizza class with Builder
+class Pizza {
+    private String dough;
+    private String sauce;
+    private String topping;
+
+    private Pizza(PizzaBuilder builder) {
+        this.dough = builder.dough;
+        this.sauce = builder.sauce;
+        this.topping = builder.topping;
+    }
+
+    public static class PizzaBuilder {
+        private String dough;
+        private String sauce;
+        private String topping;
+
+        public PizzaBuilder setDough(String dough) {
+            this.dough = dough;
+            return this;
+        }
+
+        public PizzaBuilder setSauce(String sauce) {
+            this.sauce = sauce;
+            return this;
+        }
+
+        public PizzaBuilder setTopping(String topping) {
+            this.topping = topping;
+            return this;
+        }
+
+        public Pizza build() {
+            return new Pizza(this);
+        }
+    }
+
+    public void showPizza() {
+        System.out.println("Pizza with " + dough + ", " + sauce + ", " + topping);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Pizza pizza = new Pizza.PizzaBuilder()
+                            .setDough("Thin Crust")
+                            .setSauce("Tomato")
+                            .setTopping("Cheese")
+                            .build();
+
+        pizza.showPizza(); // Output: Pizza with Thin Crust, Tomato, Cheese
+    }
+}
+=============================================================================================================================
+TASK:
+// Task: Create a Computer class using Builder Pattern
+// Requirements:
+// 1. Computer should have CPU, RAM, Storage, and GPU.
+// 2. Use a ComputerBuilder to set these values step by step.
+// 3. Demonstrate in Main how to build different configurations:
+//    - Gaming PC (high RAM + GPU)
+//    - Office PC (basic CPU + storage)
+=============================================================================================================================
+class Computer{
+	private String CPU;
+	private String RAM;
+	private String Storage;
+	private String GPU;
+	private Computer(ComputerBuilder builder){
+		this.CPU=builder.CPU;
+		this.RAM=builder.RAM;
+		this.Storage=builder.Storage;
+		this.GPU=builder.GPU;
+	}
+	public static class ComputerBuilder{
+		private String CPU;
+        	private String RAM;
+        	private String Storage;
+		private String GPU;
+		public ComputerBuilder setCPU(String CPU) {
+            		this.CPU = CPU;
+            		return this;
+        	}
+        	public ComputerBuilder setRAM(String RAM) {
+            		this.RAM = RAM;
+            		return this;
+        	}
+        	public ComputerBuilder setStorage(String Storage) {
+            		this.Storage = Storage;
+            		return this;
+        	}
+		public ComputerBuilder setGPU(String GPU){
+	    		this.GPU=GPU;
+	    		return this;
+		}
+        	public ComputerBuilder build() {
+            		return new Computer(this);
+        	}
+	}
+	public void showComputer() {
+        	System.out.println("PC Configuration with " + CPU + ", " + RAM + ", " + Storage + ", " + GPU);
+    	}
+}
+class Main{
+	public static void main(String[] args){
+		Computer gamingPC = new Computer.ComputerBuilder()
+                		.setCPU("Intel i9")
+                		.setRAM(32)
+                		.setStorage(1000 )
+                		.setGPU("NVIDIA RTX 4080")
+                		.build();
+        	Computer officePC = new Computer.ComputerBuilder()
+                		.setCPU("Intel i5")
+                		.setRAM(8)
+                		.setStorage(512)
+				.setGPU("Integrated Graphics")
+                		.build();
+        	System.out.println("Gaming PC Configuration");
+        	gamingPC.showComputer();
+        	System.out.println("Office PC Configuration");
+        	officePC.showComputer();
+	}
+}
+=============================================================================================================================
+5. PROTOTYPE:
+
+BAD CODE:
+class Document {
+    String content;
+    String author;
+
+    public Document(String content, String author) {
+        this.content = content;
+        this.author = author;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Document doc1 = new Document("Design Patterns", "Sylvia");
+
+        // Manual copy → repetitive
+        Document doc2 = new Document(doc1.content, doc1.author);
+
+        System.out.println(doc2.content); // Design Patterns
+    }
+}
+
+Problem: Copying requires manually re‑passing all fields.
+Error‑prone if object has many attributes
+----------------------------------------------------------------------
+correct:
+// Prototype interface
+interface Prototype {
+    Prototype clone();
+}
+// Document class implementing Prototype
+class Document implements Prototype {
+    String content;
+    String author;
+    public Document(String content, String author) {
+        this.content = content;
+        this.author = author;
+    }
+    @Override
+    public Prototype clone() {
+        return new Document(content, author);
+    }
+    public void show() {
+        System.out.println("Document: " + content + " by " + author);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Document doc1 = new Document("Design Patterns", "Sylvia");
+        Document doc2 = (Document) doc1.clone();
+        doc1.show(); // Document: Design Patterns by Sylvia
+        doc2.show(); // Document: Design Patterns by Sylvia
+    }
+}
+=============================================================================================================================
+TASK:
+// Task: Create a Shape class hierarchy using Prototype Pattern
+// Requirements:
+// 1. Define a Prototype interface with clone().
+// 2. Implement Circle and Rectangle classes that can be cloned.
+// 3. Demonstrate in Main how to copy shapes without re‑creating them manually.
+=============================================================================================================================
+interface Prototype {
+    Prototype clone();
+}
+class Circle implements Prototype {
+    int radius;
+    public Circle(int radius) {
+        this.radius = radius;
+    }
+    @Override
+    public Prototype clone() {
+        return new Circle(radius);
+    }
+    public void show() {
+        System.out.println("Circle with radius: " + radius);
+    }
+}
+class Rectangle implements Prototype {
+    int width;
+    int height;
+    public Rectangle(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+    @Override
+    public Prototype clone() {
+        return new Rectangle(width, height);
+    }
+    public void show() {
+        System.out.println("Rectangle with width: " + width + " and height: " + height);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Circle circle1 = new Circle(10);
+        Circle circle2 = (Circle) circle1.clone();
+        Rectangle rect1 = new Rectangle(20, 30);
+        Rectangle rect2 = (Rectangle) rect1.clone();
+        circle1.show();
+        circle2.show();
+        rect1.show();  
+        rect2.show();  
+    }
+}
+=============================================================================================================================
+
+
+
+
+
+
+
+
+
+
