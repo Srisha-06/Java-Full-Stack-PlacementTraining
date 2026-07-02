@@ -1,0 +1,526 @@
+1. ADAPTER: 30.06.2026, 01.07.2026
+===========
+BAD CODE:
+
+interface Charger {
+    void charge();
+}
+
+// Existing USPlug class (incompatible)
+class USPlug {
+    public void supplyPower() {
+        System.out.println("Power from US plug (110V)");
+    }
+}
+
+// Client tries to use USPlug directly
+public class Main {
+    public static void main(String[] args) {
+        // ERROR: USPlug doesn't match Charger interface
+        Charger charger = new USPlug(); 
+        charger.charge();
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------
+CORRECT CODE:
+
+interface Charger {
+    void charge();
+}
+class USPlug {
+    public void supplyPower() {
+        System.out.println("Power from US plug (110V)");
+    }
+}
+class Adapter implements Charger {
+    private USPlug usplug;
+    public Adapter(USPlug usplug) {
+        this.usplug = usplug;
+    }
+
+    @Override
+    public void charge() {
+        usplug.supplyPower();
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        USPlug usplug = new USPlug();
+        Adapter charger = new Adapter(usplug);
+        charger.charge();
+    }
+}
+==========================================================================================================================================
+Ex-2: BAD CODE:
+
+class PostgresDB {
+    public void connectPostgres() {
+        System.out.println("Connected to PostgreSQL ");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        PostgresDB db = new PostgresDB();
+        db.connectPostgres(); // Works only for Postgres 
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------
+CORRECT CODE:
+
+interface Database {
+    void selectDB();
+}
+class PostgresDB {
+    public void connectPostgres() {
+        System.out.println("Connected to PostgreSQL");
+    }
+}
+class MySQLDB {
+    public void connectMySQL() {
+        System.out.println("Connected to MySQL");
+    }
+}
+class MongoDB {
+    public void connectMongo() {
+        System.out.println("Connected to MongoDB");
+    }
+}
+class PostgresAdapter implements Database {
+    private PostgresDB postgresDB;
+
+    public PostgresAdapter(PostgresDB postgresDB) {
+        this.postgresDB = postgresDB;
+    }
+    @Override
+    public void selectDB() {
+        postgresDB.connectPostgres();
+    }
+}
+class MySQLAdapter implements Database {
+    private MySQLDB mySQLDB;
+
+    public MySQLAdapter(MySQLDB mySQLDB) {
+        this.mySQLDB = mySQLDB;
+    }
+
+    @Override
+    public void selectDB() {
+        mySQLDB.connectMySQL();
+    }
+}
+class MongoAdapter implements Database {
+    private MongoDB mongoDB;
+
+    public MongoAdapter(MongoDB mongoDB) {
+        this.mongoDB = mongoDB;
+    }
+
+    @Override
+    public void selectDB() {
+        mongoDB.connectMongo();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Database db1 = new PostgresAdapter(new PostgresDB());
+        db1.selectDB();
+        Database db2 = new MySQLAdapter(new MySQLDB());
+        db2.selectDB();
+
+        Database db3 = new MongoAdapter(new MongoDB());
+        db3.selectDB();
+    }
+}
+==========================================================================================================================================
+2. DECORATOR:
+=============
+BAD CODE:
+
+class Coffee {
+    public String getDescription() {
+        return "Plain Coffee";
+    }
+}
+
+// Hard-coded subclasses for every variation
+class CoffeeWithMilk extends Coffee {
+    @Override
+    public String getDescription() {
+        return "Plain Coffee + Milk";
+    }
+}
+
+class CoffeeWithCaramel extends Coffee {
+    @Override
+    public String getDescription() {
+        return "Plain Coffee + Caramel";
+    }
+}
+
+// Client
+public class Main {
+    public static void main(String[] args) {
+        Coffee c1 = new CoffeeWithMilk();
+        System.out.println(c1.getDescription()); // Plain Coffee + Milk
+
+        Coffee c2 = new CoffeeWithCaramel();
+        System.out.println(c2.getDescription()); // Plain Coffee + Caramel
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------
+CORRECT CODE:
+
+interface Coffee {    //component interface
+    String getDescription();
+}
+
+
+class PlainCoffee implements Coffee {    //concrete component
+    public String getDescription() {
+        return "Plain Coffee";
+    }
+}
+
+
+abstract class CoffeeDecorator implements Coffee {    //decorator base
+    protected Coffee coffee;
+    public CoffeeDecorator(Coffee coffee) {
+        this.coffee = coffee;
+    }
+    public String getDescription() {
+        return coffee.getDescription();
+    }
+}
+
+
+class MilkDecorator extends CoffeeDecorator {    //concrete decorator
+    public MilkDecorator(Coffee coffee) {
+        super(coffee);
+    }
+    public String getDescription() {
+        return super.getDescription() + " + Milk";
+    }
+}
+
+class CaramelDecorator extends CoffeeDecorator {    //concrete decorator
+    public CaramelDecorator(Coffee coffee) {
+        super(coffee);
+    }
+    public String getDescription() {
+        return super.getDescription() + " + Caramel";
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Coffee c1 = new MilkDecorator(new PlainCoffee());
+        System.out.println(c1.getDescription()); 
+
+        Coffee c2 = new CaramelDecorator(new MilkDecorator(new PlainCoffee()));
+        System.out.println(c2.getDescription()); 
+    }
+}
+==========================================================================================================================================
+TASK:
+Problem:
+You are building a Notification System. Right now, you can only send a plain text message.
+But sometimes you want to add extra features like:
+- Sending with Email
+- Sending with SMS
+- Sending with WhatsApp
+==========================================================================================================================================
+interface Message {
+    String getDescription();
+}
+
+
+class TextMessage implements Message {
+    public String getDescription() {
+        return "Plain Text Message";
+    }
+}
+
+
+abstract class MessageDecorator implements Message {
+    protected Message message;
+    public MessageDecorator(Message message) {
+        this.message = message;
+    }
+    public String getDescription() {
+        return message.getDescription();
+    }
+}
+
+
+class Email extends MessageDecorator {
+    public Email(Message message) {
+        super(message);
+    }
+    public String getDescription() {
+        return super.getDescription() + " + Email";
+    }
+}
+
+class SMS extends MessageDecorator {
+    public SMS(Message message) {
+        super(message);
+    }
+    public String getDescription() {
+        return super.getDescription() + " + SMS";
+    }
+}
+
+class WhatsApp extends MessageDecorator {
+    public WhatsApp(Message message) {
+        super(message);
+    }
+    public String getDescription() {
+        return super.getDescription() + " + WhatsApp";
+    }
+}
+
+
+public class Main {
+    public static void main(String[] args) {
+        Message c1 = new Email(new TextMessage());
+        System.out.println(c1.getDescription()); 
+
+        Message c2 = new SMS(new TextMessage());
+        System.out.println(c2.getDescription());
+
+	Message c3 = new WhatsApp(new TextMessage());
+        System.out.println(c3.getDescription());
+    }
+}
+==========================================================================================================================================
+3.COMPOSITE:
+============
+ex: problem statement:
+Design a restaurant menu system where the program can display both single dishes (like Burger, Fries) and whole sections (like Drinks → Coffee, Tea) using the same method call.
+The system should allow menus to contain items or other menus, so you can build a tree‑like menu structure that prints everything consistently.”
+
+BAD CODE:
+
+class MenuItem {
+    private String name;
+    public MenuItem(String name) { this.name = name; }
+    public void show() { System.out.println("Item: " + name); }
+}
+
+// Menu class (no common interface)
+class Menu {
+    private String name;
+    private List<MenuItem> items = new ArrayList<>();
+    public Menu(String name) { this.name = name; }
+    public void addItem(MenuItem item) { items.add(item); }
+    public void show() {
+        System.out.println("Menu: " + name);
+        for (MenuItem i : items) {
+            i.show();
+        }
+    }
+}
+
+// Client
+public class Main {
+    public static void main(String[] args) {
+        MenuItem burger = new MenuItem("Burger");
+        MenuItem fries = new MenuItem("Fries");
+
+        Menu fastFood = new Menu("Fast Food");
+        fastFood.addItem(burger);
+        fastFood.addItem(fries);
+
+        fastFood.show();
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------
+CORRECT CODE:
+
+interface MenuComponent {
+    void show();
+}
+
+// Leaf: MenuItem
+class MenuItem implements MenuComponent {
+    private String name;
+    public MenuItem(String name) { this.name = name; }
+    public void show() { System.out.println("Item: " + name); }
+}
+
+// Composite: Menu
+class Menu implements MenuComponent {
+    private String name;
+    private List<MenuComponent> children = new ArrayList<>();
+    public Menu(String name) { this.name = name; }
+    public void add(MenuComponent component) { children.add(component); }
+    public void show() {
+        System.out.println("Menu: " + name);
+        for (MenuComponent c : children) {
+            c.show();
+        }
+    }
+}
+
+// Client
+public class Main {
+    public static void main(String[] args) {
+        MenuItem burger = new MenuItem("Burger");
+        MenuItem fries = new MenuItem("Fries");
+        MenuItem coffee = new MenuItem("Coffee");
+        MenuItem tea = new MenuItem("Tea");
+
+        Menu drinks = new Menu("Drinks");
+        drinks.add(coffee);
+        drinks.add(tea);
+
+        Menu fastFood = new Menu("Fast Food");
+        fastFood.add(burger);
+        fastFood.add(fries);
+        fastFood.add(drinks); // nested menu
+
+        fastFood.show();
+    }
+}
+==========================================================================================================================================
+Task:
+
+You are building a simple GUI framework. A screen can contain individual components (like buttons, text boxes) and composite components (like panels that group multiple components).
+
+A UIComponent interface with a render() method.
+Button, TextBox, Label (each renders itself).
+Panel (can contain multiple components, including other panels).
+Client code should be able to call render() on any component without worrying if it’s a single element or a container.
+==========================================================================================================================================
+//CODE WITHOUT COMPOSITE DESIGN PATTERN:// Leaf classes with separate render methods
+class Button {
+    private String label;
+    public Button(String label) { this.label = label; }
+    public void renderButton() {
+        System.out.println("Rendering Button: " + label);
+    }
+}
+
+class TextBox {
+    private String text;
+    public TextBox(String text) { this.text = text; }
+    public void renderTextBox() {
+        System.out.println("Rendering TextBox: " + text);
+    }
+}
+
+class Label {
+    private String caption;
+    public Label(String caption) { this.caption = caption; }
+    public void renderLabel() {
+        System.out.println("Rendering Label: " + caption);
+    }
+}
+
+// Composite-like class but without a common interface
+class Panel {
+    private List<Object> children = new ArrayList<>();
+
+    public void add(Object component) {
+        children.add(component);
+    }
+
+    public void renderPanel() {
+        System.out.println("Rendering Panel...");
+        for (Object c : children) {
+            if (c instanceof Button) {
+                ((Button)c).renderButton();
+            } else if (c instanceof TextBox) {
+                ((TextBox)c).renderTextBox();
+            } else if (c instanceof Label) {
+                ((Label)c).renderLabel();
+            } else if (c instanceof Panel) {
+                ((Panel)c).renderPanel();
+            }
+        }
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Button btn = new Button("Submit");
+        TextBox txt = new TextBox("Enter Name");
+        Label lbl = new Label("User Form");
+
+        Panel innerPanel = new Panel();
+        innerPanel.add(lbl);
+
+        Panel mainPanel = new Panel();
+        mainPanel.add(btn);
+        mainPanel.add(txt);
+        mainPanel.add(innerPanel);
+
+        mainPanel.renderPanel();
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------
+CORRECT CODE:
+
+import java.util.*;
+interface UIComponent {
+    void render();
+}
+class Button implements UIComponent {
+    private String label;
+    public Button(String label) {
+        this.label = label;
+    }
+    @Override
+    public void render() {
+        System.out.println("Rendering Button: " + label);
+    }
+}
+class TextBox implements UIComponent {
+    private String text;
+    public TextBox(String text) {
+        this.text = text;
+    }
+    @Override
+    public void render() {
+        System.out.println("Rendering TextBox: " + text);
+    }
+}
+class Label implements UIComponent {
+    private String caption;
+    public Label(String caption) {
+        this.caption = caption;
+    }
+    @Override
+    public void render() {
+        System.out.println("Rendering Label: " + caption);
+    }
+}
+class Panel implements UIComponent {
+    private List<UIComponent> children = new ArrayList<>();
+    public void add(UIComponent component) {
+        children.add(component);
+    }
+    @Override
+    public void render() {
+        System.out.println("Rendering Panel...");
+        for (UIComponent component : children) {
+            component.render();
+        }
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        UIComponent btn = new Button("Submit");
+        UIComponent txt = new TextBox("Enter Name");
+        UIComponent lbl = new Label("User Form");
+        Panel innerPanel = new Panel();
+        innerPanel.add(lbl);
+        Panel mainPanel = new Panel();
+        mainPanel.add(btn);
+        mainPanel.add(txt);
+        mainPanel.add(innerPanel);
+        mainPanel.render();
+    }
+}
+================================================================================================================================================
